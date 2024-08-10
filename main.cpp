@@ -6,6 +6,12 @@
 
 using namespace std;
 
+struct WinCon
+{
+    bool win = false;
+    int lives = 3;
+};
+
 struct Board
 {
     int board[SIZE][SIZE] = {
@@ -19,14 +25,18 @@ struct Board
         {0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0}};
 
+    bool playableBoard[SIZE][SIZE];
+
     int xpos = 0;
     int ypos = 0;
 };
 
 void ncursesSetup();
 void printBoard(Board b);
-void detectKeypress(int *xpos, int *ypos);
-void wrapCoords(int *xpos, int *ypos);
+void detectKeypress(Board *b);
+void wrapCoords(Board *b);
+void createPlayableBoard(Board *b);
+void checkWin(Board *b, WinCon *wc);
 
 void ncursesSetup()
 {
@@ -86,55 +96,126 @@ void printBoard(Board b)
     }
 }
 
-void detectKeypress(int *xpos, int *ypos)
+void detectKeypress(Board *b)
 {
     int key = getch();
 
-    switch (key)
+    if (!isdigit(key))
     {
-    case KEY_UP:
-        *ypos -= 1;
-        break;
-    case KEY_DOWN:
-        *ypos += 1;
-        break;
-    case KEY_LEFT:
-        *xpos -= 1;
-        break;
-    case KEY_RIGHT:
-        *xpos += 1;
-        break;
+        switch (key)
+        {
+        case KEY_UP:
+            b->ypos -= 1;
+            break;
+        case KEY_DOWN:
+            b->ypos += 1;
+            break;
+        case KEY_LEFT:
+            b->xpos -= 1;
+            break;
+        case KEY_RIGHT:
+            b->xpos += 1;
+            break;
+        }
+    }
+    else if (isdigit(key))
+    {
+        if (b->playableBoard[b->ypos][b->xpos])
+        {
+            b->board[b->ypos][b->xpos] = key - '0';
+        }
     }
 }
 
-void wrapCoords(int *xpos, int *ypos)
+void wrapCoords(Board *b)
 {
-    if (*ypos < 0)
+    if (b->ypos < 0)
     {
-        *ypos = SIZE - 1;
+        b->ypos = SIZE - 1;
     }
-    else if (*ypos > SIZE - 1)
+    else if (b->ypos > SIZE - 1)
     {
-        *ypos = 0;
+        b->ypos = 0;
     }
 
-    if (*xpos < 0)
+    if (b->xpos < 0)
     {
-        *xpos = SIZE - 1;
+        b->xpos = SIZE - 1;
     }
-    else if (*xpos > SIZE - 1)
+    else if (b->xpos > SIZE - 1)
     {
-        *xpos = 0;
+        b->xpos = 0;
     }
 }
 
-void gameLoop(Board b)
+void gameLoop(Board b, WinCon *wc)
 {
-    while (true)
+    while (!wc->win && wc->lives != 0)
     {
         printBoard(b);
-        detectKeypress(&b.xpos, &b.ypos);
-        wrapCoords(&b.xpos, &b.ypos);
+        wrapCoords(&b);
+        detectKeypress(&b);
+        checkWin(&b, wc);
+    }
+}
+
+void checkWin(Board *b, WinCon *wc)
+{
+
+    for (int i = 0; i < SIZE; i++)
+    {
+        int check[SIZE] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+        for (int j = 0; j < SIZE; j++)
+        {
+            if (b->board[i][j] != 0)
+            {
+                check[b->board[i][j] - 1]++;
+
+                if (check[b->board[i][j] - 1] > 1)
+                {
+                    wc->lives--;
+                    b->board[b->ypos][b->xpos] = 0;
+                }
+            }
+        }
+    }
+
+    for (int j = 0; j < SIZE; j++)
+    {
+        int check[SIZE] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+        for (int i = 0; i < SIZE; i++)
+        {
+            if (b->board[i][j] != 0)
+            {
+                check[b->board[i][j] - 1]++;
+
+                if (check[b->board[i][j] - 1] > 1)
+                {
+                    wc->lives--;
+                    b->board[b->ypos][b->xpos] = 0;
+                }
+            }
+        }
+    }
+}
+
+void createPlayableBoard(Board *b)
+{
+    for (int i = 0; i < SIZE; i++)
+    {
+        for (int j = 0; j < SIZE; j++)
+        {
+            if (b->board[i][j] != 0)
+            {
+                b->playableBoard[i][j] = false;
+            }
+            else
+            {
+                b->playableBoard[i][j] = true;
+            }
+        }
     }
 }
 
@@ -143,8 +224,11 @@ int main()
     ncursesSetup();
 
     Board b;
+    WinCon wc;
 
-    gameLoop(b);
+    createPlayableBoard(&b);
+
+    gameLoop(b, &wc);
 
     endwin();
 
