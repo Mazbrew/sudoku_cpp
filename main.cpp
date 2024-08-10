@@ -32,7 +32,7 @@ struct Board
 };
 
 void ncursesSetup();
-void printBoard(Board b);
+void printBoard(Board *b, WinCon *wc);
 void detectKeypress(Board *b);
 void wrapCoords(Board *b);
 void createPlayableBoard(Board *b);
@@ -46,7 +46,7 @@ void ncursesSetup()
     keypad(stdscr, TRUE); // Enable special keys like arrow keys
 }
 
-void printBoard(Board b)
+void printBoard(Board *b, WinCon *wc)
 {
     system("clear");
 
@@ -62,7 +62,7 @@ void printBoard(Board b)
 
     for (int i = 0; i < SIZE; i++)
     {
-        if (i == b.xpos)
+        if (i == b->xpos)
         {
             cout << '+';
         }
@@ -78,7 +78,7 @@ void printBoard(Board b)
     {
         cout << i + 1;
 
-        if (b.ypos == i)
+        if (b->ypos == i)
         {
             cout << '+';
         }
@@ -89,10 +89,18 @@ void printBoard(Board b)
 
         for (int j = 0; j < SIZE; j++)
         {
-            cout << b.board[i][j];
+            cout << b->board[i][j];
         }
 
         cout << "\r\n";
+    }
+
+    cout << "\r\n";
+    cout << "[LIVES] " << wc->lives << endl;
+
+    if(wc->lives == 0){
+        system("clear");
+        cout << "[PRESS ANY KEY TO EXIT]" << endl;
     }
 }
 
@@ -148,14 +156,16 @@ void wrapCoords(Board *b)
     }
 }
 
-void gameLoop(Board b, WinCon *wc)
+void gameLoop(Board *b, WinCon *wc)
 {
+    printBoard(b, wc);
+
     while (!wc->win && wc->lives != 0)
     {
-        printBoard(b);
-        wrapCoords(&b);
-        detectKeypress(&b);
-        checkWin(&b, wc);
+        wrapCoords(b);
+        checkWin(b, wc);
+        printBoard(b, wc);
+        detectKeypress(b);
     }
 }
 
@@ -228,7 +238,7 @@ int main()
 
     createPlayableBoard(&b);
 
-    gameLoop(b, &wc);
+    gameLoop(&b, &wc);
 
     endwin();
 
