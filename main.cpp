@@ -15,9 +15,9 @@ struct WinCon
 struct Board
 {
     int board[SIZE][SIZE] = {
-        {0, 0, 0, 0, 0, 0, 0, 0, 1},
-        {2, 0, 0, 0, 0, 0, 0, 0, 0},
-        {3, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -106,7 +106,7 @@ void printBoard(Board *b, WinCon *wc)
     else if (wc->win == true)
     {
         system("clear");
-        cout << "YOU WIN\n";
+        cout << "YOU WIN\r\n";
         cout << "[PRESS ANY KEY TO EXIT]" << endl;
     }
 }
