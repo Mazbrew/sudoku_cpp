@@ -98,8 +98,15 @@ void printBoard(Board *b, WinCon *wc)
     cout << "\r\n";
     cout << "[LIVES] " << wc->lives << endl;
 
-    if(wc->lives == 0){
+    if (wc->lives == 0)
+    {
         system("clear");
+        cout << "[PRESS ANY KEY TO EXIT]" << endl;
+    }
+    else if (wc->win == true)
+    {
+        system("clear");
+        cout << "YOU WIN\n";
         cout << "[PRESS ANY KEY TO EXIT]" << endl;
     }
 }
@@ -171,7 +178,6 @@ void gameLoop(Board *b, WinCon *wc)
 
 void checkWin(Board *b, WinCon *wc)
 {
-
     for (int i = 0; i < SIZE; i++)
     {
         int check[SIZE] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -186,6 +192,7 @@ void checkWin(Board *b, WinCon *wc)
                 {
                     wc->lives--;
                     b->board[b->ypos][b->xpos] = 0;
+                    return;
                 }
             }
         }
@@ -205,10 +212,54 @@ void checkWin(Board *b, WinCon *wc)
                 {
                     wc->lives--;
                     b->board[b->ypos][b->xpos] = 0;
+                    return;
                 }
             }
         }
     }
+
+    for (int k = 0; k < 3; k++)
+    {
+        for (int l = 0; l < 3; l++)
+        {
+            int check[SIZE] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    int xsect = l * 3;
+                    int ysect = k * 3;
+
+                    if (b->board[ysect + i][xsect + j] != 0)
+                    {
+                        check[b->board[ysect + i][xsect + j] - 1]++;
+
+                        if (check[b->board[ysect + i][xsect + j] - 1] > 1)
+                        {
+                            wc->lives--;
+                            b->board[b->ypos][b->xpos] = 0;
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    for (int i = 0; i < SIZE; i++)
+    {
+        for (int j = 0; j < SIZE; j++)
+        {
+            if (b->board[i][j] == 0)
+            {
+                return;
+            }
+        }
+    }
+
+    wc->win = true;
+    return;
 }
 
 void createPlayableBoard(Board *b)
