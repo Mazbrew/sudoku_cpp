@@ -106,7 +106,7 @@ void printBoard(Board *b, WinCon *wc)
     else if (wc->win == true)
     {
         system("clear");
-        cout << "YOU WIN\r\n";
+        cout << "YOU WIN\n\r";
         cout << "[PRESS ANY KEY TO EXIT]" << endl;
     }
 }
